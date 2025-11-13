@@ -14,7 +14,7 @@ const auth = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findByPk(decoded.userId, {
-      include: [{ model: Role, as: 'role' }],
+      include: [Role],
       attributes: { exclude: ['password'] }
     });
     
@@ -32,7 +32,18 @@ const auth = async (req, res, next) => {
       });
     }
 
-    req.user = user;
+    req.user = {
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      roleId: user.roleId,
+      isActive: user.isActive,
+      role: user.Role ? {
+        id: user.Role.id,
+        name: user.Role.name
+      } : null
+    };
+
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
@@ -47,6 +58,7 @@ const auth = async (req, res, next) => {
         code: 'TOKEN_EXPIRED'
       });
     }
+    console.error('Auth middleware error:', error);
     res.status(500).json({ 
       error: 'Ошибка аутентификации',
       code: 'AUTH_ERROR'

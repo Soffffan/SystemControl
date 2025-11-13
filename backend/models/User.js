@@ -11,7 +11,7 @@ const User = sequelize.define('User', {
   isActive: { type: DataTypes.BOOLEAN, defaultValue: true }
 }, {
   tableName: 'users',
-  //timestamps: false,
+  timestamps: false,
   hooks: {
     beforeSave: async (user) => {
       if (user.changed('password')) {
